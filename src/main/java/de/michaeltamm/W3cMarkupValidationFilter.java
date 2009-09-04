@@ -274,6 +274,7 @@ public class W3cMarkupValidationFilter implements Filter {
     }
 
     private class TeeHttpServletResponse extends HttpServletResponseWrapper {
+        private final String _contextPath;
         private boolean _isHtml;
         private TeeServletOutputStream _stream;
         private TeePrintWriter _writer;
@@ -282,8 +283,9 @@ public class W3cMarkupValidationFilter implements Filter {
         private StackTraceElement[] _strackForGetOutputStream;
         private StackTraceElement[] _strackForGetWriter;
 
-        private TeeHttpServletResponse(boolean isHtml, HttpServletResponse response) {
+        private TeeHttpServletResponse(HttpServletResponse response, String contextPath, boolean isHtml) {
             super(response);
+            _contextPath = contextPath;
             _isHtml = isHtml;
         }
 
@@ -373,7 +375,7 @@ public class W3cMarkupValidationFilter implements Filter {
                             }
                             final String backgroundColor = result.isValid() ? "#55B05A" : "#D23D24";
                             sb.append("        jQuery('#w3c-markup-validation-box p:eq(1)').html('").append(result.getMessage()).append("');\n")
-                              .append("        jQuery('#w3c-markup-validation-box').append('<p style=\"margin:0;border:0;padding:0\"><a href=\"/view-w3c-markup-validation-result-").append(i).append("\" style=\"font-family:sans-serif;font-size:small;font-weight:normal;text-decoration:none;color:blue\" target=\"_blank\">View Result</a></p>');\n")
+                              .append("        jQuery('#w3c-markup-validation-box').append('<p style=\"margin:0;border:0;padding:0\"><a href=\"").append(_contextPath).append("/view-w3c-markup-validation-result-").append(i).append("\" style=\"font-family:sans-serif;font-size:small;font-weight:normal;text-decoration:none;color:blue\" target=\"_blank\">View Result</a></p>');\n")
                               .append("        jQuery('#w3c-markup-validation-box').css('border-color', '").append(result.isValid() ? "green" : "red").append("').css('background-color', '").append(backgroundColor).append("').find('*').css('background-color', '").append(backgroundColor).append("');\n");
 
                         } catch (RuntimeException e) {
@@ -486,7 +488,8 @@ public class W3cMarkupValidationFilter implements Filter {
                 } else {
                     final boolean isHtml = uri.endsWith("/") || uri.endsWith(".html") || uri.endsWith(".htm");
                     final HttpServletResponse response = (HttpServletResponse) servletResponse;
-                    final TeeHttpServletResponse responseWrapper = new TeeHttpServletResponse(isHtml, response);
+                    final String contextPath = request.getContextPath();
+                    final TeeHttpServletResponse responseWrapper = new TeeHttpServletResponse(response, contextPath, isHtml);
                     filterChain.doFilter(request, responseWrapper);
                     responseWrapper.beforeClose();
                 }
