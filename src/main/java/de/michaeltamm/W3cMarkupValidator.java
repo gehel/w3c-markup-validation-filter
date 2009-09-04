@@ -86,6 +86,7 @@ public class W3cMarkupValidator {
             final String pathPrefix = _checkUrl.substring(0, _checkUrl.lastIndexOf('/') + 1);
             final String resultPage = getResponseBody(postMethod)
                                 .replace("\"./", "\"" + pathPrefix)
+                                .replace("src=\"images/", "src=\"" + pathPrefix + "images/")
                                 .replace("<script type=\"text/javascript\" src=\"loadexplanation.js\">", "<script type=\"text/javascript\" src=\"" + pathPrefix + "loadexplanation.js\">");
             return new W3cMarkupValidationResult(resultPage);
         } catch (RuntimeException e) {
