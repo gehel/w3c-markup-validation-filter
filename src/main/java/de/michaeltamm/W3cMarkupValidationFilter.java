@@ -364,7 +364,8 @@ public class W3cMarkupValidationFilter implements Filter {
                         appendAndFlush(_appendix);
                         final StringBuilder sb = new StringBuilder(1000);
                         sb.append("<script type=\"text/javascript\">\n")
-                          .append("    setTimeout(function() {\n");
+                          .append("    function updateW3cValidationBox() {\n")
+                          .append("        if (typeof jQuery != 'undefined' && jQuery('#w3c-markup-validation-box').length > 0) {\n");
                         try {
                             html = preProcessHtml(html);
                             final W3cMarkupValidationResult result = _validator.validate(html);
@@ -374,16 +375,20 @@ public class W3cMarkupValidationFilter implements Filter {
                                 _cachedResults[i % MAX_CACHED_RESULTS] = result;
                             }
                             final String backgroundColor = result.isValid() ? "#55B05A" : "#D23D24";
-                            sb.append("        jQuery('#w3c-markup-validation-box p:eq(1)').html('").append(result.getMessage()).append("');\n")
-                              .append("        jQuery('#w3c-markup-validation-box').append('<p style=\"margin:0;border:0;padding:0\"><a href=\"").append(_contextPath).append("/view-w3c-markup-validation-result-").append(i).append("\" style=\"font-family:sans-serif;font-size:small;font-weight:normal;text-decoration:none;color:blue\" target=\"_blank\">View Result</a></p>');\n")
-                              .append("        jQuery('#w3c-markup-validation-box').css('border-color', '").append(result.isValid() ? "green" : "red").append("').css('background-color', '").append(backgroundColor).append("').find('*').css('background-color', '").append(backgroundColor).append("');\n");
+                            sb.append("            jQuery('#w3c-markup-validation-box p:eq(1)').html('").append(result.getMessage()).append("');\n")
+                              .append("            jQuery('#w3c-markup-validation-box').append('<p style=\"margin:0;border:0;padding:0\"><a href=\"").append(_contextPath).append("/view-w3c-markup-validation-result-").append(i).append("\" style=\"font-family:sans-serif;font-size:small;font-weight:normal;text-decoration:none;color:blue\" target=\"_blank\">View Result</a></p>');\n")
+                              .append("            jQuery('#w3c-markup-validation-box').css('border-color', '").append(result.isValid() ? "green" : "red").append("').css('background-color', '").append(backgroundColor).append("').find('*').css('background-color', '").append(backgroundColor).append("');\n");
 
                         } catch (RuntimeException e) {
-                            sb.append("        jQuery('#w3c-markup-validation-box p:eq(1)').html('W3C Markup Validation failed: ").append(normalizeSpace(e.getMessage()).replace("<", "&lt;").replace(">", "&gt;").replace("'", "\\'")).append("');\n")
-                              .append("        jQuery('#w3c-markup-validation-box').css('border-color', 'red').css('background-color', 'D23D24').find('*').css('background-color', 'D23D24');\n");
+                            sb.append("            jQuery('#w3c-markup-validation-box p:eq(1)').html('W3C Markup Validation failed: ").append(normalizeSpace(e.getMessage()).replace("<", "&lt;").replace(">", "&gt;").replace("'", "\\'")).append("');\n")
+                              .append("            jQuery('#w3c-markup-validation-box').css('border-color', 'red').css('background-color', 'D23D24').find('*').css('background-color', 'D23D24');\n");
 
                         }
-                        sb.append("    }, 100);\n")
+                        sb.append("        } else {\n")
+                          .append("            setTimeout(updateW3cValidationBox, 100);\n")
+                          .append("        }\n")
+                          .append("    }\n")
+                          .append("    updateW3cValidationBox();\n")
                           .append("</script>\n");
                         appendAndFlush(sb.toString());
                     }
@@ -452,13 +457,20 @@ public class W3cMarkupValidationFilter implements Filter {
                         "    }\n" +
                         "</script>\n" +
                         "<script type=\"text/javascript\">\n" +
-                        "     setTimeout(function() {\n" +
-                        "        jQuery('body').append('<div id=\"w3c-markup-validation-box\" style=\"z-index:10000;position:fixed;top:33px;right:33px;width:250px;border:3px solid yellow;padding:3px;background-color:white;opacity:0.75\">" +
-                                                   "<p style=\"position:absolute;top:3px;right:5px;margin:0;broder:0;padding:0;background-color:white\"><a href=\"javascript:closeW3cValidationBox()\" style=\"font-family:sans-serif;font-size:small;font-weight:bold;text-decoration:none;color:black\">X</a></p>" +
-                                                   "<p style=\"margin:0;border:0;padding:0;padding-right:1.5em;font-family:sans-serif;font-size:small;font-weight:normal;text-decoration:none;color:black;background-color:white\">W3C Markup Validation is running ...</p>" +
-                                                   "</div>');\n" +
-                        "    }, 100);\n" +
-                        "    function closeW3cValidationBox() { jQuery('#w3c-markup-validation-box').hide(); }\n" +
+                        "    function initW3cValidationBox() {\n" +
+                        "        if (typeof jQuery == 'undefined') {\n" +
+                        "            setTimeout(initW3cValidationBox, 100);\n" +
+                        "        } else {\n" +
+                        "            jQuery('body').append('<div id=\"w3c-markup-validation-box\" style=\"z-index:10000;position:absolute;top:33px;right:33px;width:250px;border:3px solid yellow;padding:3px;background-color:white;opacity:0.75\">" +
+                                                               "<p style=\"position:absolute;top:3px;right:5px;margin:0;broder:0;padding:0;background-color:white\"><a href=\"javascript:closeW3cValidationBox()\" style=\"font-family:sans-serif;font-size:small;font-weight:bold;text-decoration:none;color:black\">X</a></p>" +
+                                                               "<p style=\"margin:0;border:0;padding:0;padding-right:1.5em;font-family:sans-serif;font-size:small;font-weight:normal;text-decoration:none;color:black;background-color:white\">W3C Markup Validation is running ...</p>" +
+                                                           "</div>');\n" +
+                        "        }\n" +
+                        "    }\n" +
+                        "    function closeW3cValidationBox() {\n" +
+                        "        jQuery('#w3c-markup-validation-box').hide();\n" +
+                        "    }\n" +
+                        "    initW3cValidationBox();\n" +
                         "</script>\n";
             _numberOfNextResult = 0;
         }
