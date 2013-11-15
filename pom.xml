@@ -8,6 +8,12 @@
     <version>1.0.2</version>
     <packaging>jar</packaging>
 
+    <parent>
+        <groupId>ch.ledcom</groupId>
+        <artifactId>ledcom-parent-pom</artifactId>
+        <version>1.2</version>
+    </parent>
+
     <name>W3C Markup Validation Filter</name>
 
     <dependencies>
@@ -36,5 +42,11 @@
             </plugin>
         </plugins>
     </build>
+
+    <scm>
+        <connection>scm:git:git://github.com/gehel/w3c-markup-validation-filter.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/gehel/w3c-markup-validation-filter.git</developerConnection>
+        <url>https://github.com/gehel/w3c-markup-validation-filter</url>
+    </scm>
 
 </project>
